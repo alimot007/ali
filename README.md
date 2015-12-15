@@ -225,3 +225,162 @@ function create_config( )
     realm = {},--Realms Id
     moderation = {data = 'data/moderation.json'},
     about_text = [[babali v1
+help_text = [[
+Commands list :
+!kick [username|id]
+You can also do it by reply
+!ban [ username|id]
+You can also do it by reply
+!unban [id]
+You can also do it by reply
+!who
+Members list
+!modlist
+Moderators list
+!promote [username]
+Promote someone
+!demote [username]
+Demote someone
+!kickme
+Will kick user
+!about
+Group description
+!setphoto
+Set and locks group photo
+!setname [name]
+Set group name
+!rules
+Group rules
+!id
+return group id or user id
+!help
+!lock [member|name|bots]
+Locks [member|name|bots] 
+!unlock [member|name|photo|bots]
+Unlocks [member|name|photo|bots]
+!set rules <text>
+Set <text> as rules
+!set about <text>
+Set <text> as about
+!settings
+Returns group settings
+!newlink
+create/revoke your group link
+!link
+returns group link
+!owner
+returns group owner id
+!setowner [id]
+Will set id as owner
+!setflood [value]
+Set [value] as flood sensitivity
+!stats
+Simple message statistics
+!save [value] <text>
+Save <text> as [value]
+!get [value]
+Returns text of [value]
+!clean [modlist|rules|about]
+Will clear [modlist|rules|about] and set it to nil
+!res [username]
+returns user id
+"!res @username"
+!log
+will return group logs
+!banlist
+will return group ban list
+**U can use both "/" and "!" 
+*Only owner and mods can add bots in group
+*Only moderators and owner can use kick,ban,unban,newlink,link,setphoto,setname,lock,unlock,set rules,set about and settings commands
+*Only owner can use res,setowner,promote,demote and log commands
+]]
+
+  }
+  serialize_to_file(config, './data/config.lua')
+  print('saved config into ./data/config.lua')
+end
+
+function on_our_id (id)
+  our_id = id
+end
+
+function on_user_update (user, what)
+  --vardump (user)
+end
+
+function on_chat_update (chat, what)
+
+end
+
+function on_secret_chat_update (schat, what)
+  --vardump (schat)
+end
+
+function on_get_difference_end ()
+end
+
+-- Enable plugins in config.json
+function load_plugins()
+  for k, v in pairs(_config.enabled_plugins) do
+    print("Loading plugin", v)
+
+    local ok, err =  pcall(function()
+      local t = loadfile("plugins/"..v..'.lua')()
+      plugins[v] = t
+    end)
+
+    if not ok then
+      print('\27[31mError loading plugin '..v..'\27[39m')
+      print('\27[31m'..err..'\27[39m')
+    end
+
+  end
+end
+
+
+-- custom add
+function load_data(filename)
+
+	local f = io.open(filename)
+	if not f then
+		return {}
+	end
+	local s = f:read('*all')
+	f:close()
+	local data = JSON.decode(s)
+
+	return data
+
+end
+
+function save_data(filename, data)
+
+	local s = JSON.encode(data)
+	local f = io.open(filename, 'w')
+	f:write(s)
+	f:close()
+
+end
+
+-- Call and postpone execution for cron plugins
+function cron_plugins()
+
+  for name, plugin in pairs(plugins) do
+    -- Only plugins with cron function
+    if plugin.cron ~= nil then
+      plugin.cron()
+    end
+  end
+
+  -- Called again in 2 mins
+  postpone (cron_plugins, false, 120)
+end
+
+-- Start and load values
+our_id = 0
+now = os.time()
+math.randomseed(now)
+started = false
+[group_id] logs !
+[group_id] memeberlist !
+[group_id] stats !
